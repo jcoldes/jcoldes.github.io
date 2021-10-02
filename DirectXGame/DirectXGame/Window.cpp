@@ -11,8 +11,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	switch (msg)
 	{
 	case WM_CREATE:		// Event fired when window is created
+		window->onCreate();
 		break;	
 	case WM_DESTROY:	// Event fired when window is destroyed	
+		window->onDestroy();
 		::PostQuitMessage(0);
 		break;
 	default:
@@ -58,6 +60,25 @@ bool Window::init()
 
 	if (!window)
 		window = this;
+
+	return true;
+}
+
+bool Window::broadcast()
+{
+	MSG msg;
+
+	// Process messages from the OS
+	while (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) > 0)
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+
+	window->onUpdate();
+
+	// Not to overload the CPU
+	Sleep(0);
 
 	return true;
 }
